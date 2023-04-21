@@ -1,0 +1,8 @@
+.container {
+  list-style: none;
+  grid-template-columns: 1fr;
+}
+
+.container > li:not(:last-child) {
+  margin-bottom: var(--spacing-medium);
+}

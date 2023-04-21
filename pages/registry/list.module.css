@@ -1,0 +1,26 @@
+.table {}
+
+.table > tbody > tr > td {
+  padding-bottom: var(--spacing-tiny);
+}
+
+.table > tbody > tr > td:not(:first-child) {
+  word-break: break-all;
+}
+
+.table > tbody > tr > td:first-child {
+  padding-right: var(--spacing-medium);
+}
+
+.input {
+  display: block;
+  width: 100%;
+  padding: var(--spacing-small);
+  margin-bottom: var(--spacing-small);
+  font-size: 18px;
+}
+
+.pre {
+  max-width: 100%;
+  overflow-x: scroll;
+}
