@@ -234,5 +234,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       checksum: checksum ?? "N/A",
       timestamp,
     },
+    revalidate: 1800,
   };
 };
