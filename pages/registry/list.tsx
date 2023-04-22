@@ -76,7 +76,7 @@ export default function RegistryList({ packages, checksum, timestamp, version }:
             )
           }) &&
           groupBy(search.keywords, "keyword").every((group) =>
-            group.every(({ keyword, value }) => {
+            group.some(({ keyword, value }) => {
               const input = pkg[mapKeyword(keyword)]
               if (Array.isArray(input)) {
                 return input.some((item) => item.toLowerCase().includes(value.toLowerCase()))
