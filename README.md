@@ -1,3 +1,4 @@
+[![Tests](https://github.com/mason-org/public-web/actions/workflows/tests.yml/badge.svg)](https://github.com/mason-org/public-web/actions/workflows/tests.yml)
 ![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=flat-square&logo=vercel&logoColor=white)
 [![Sponsors](https://img.shields.io/github/sponsors/williamboman?style=flat-square)](https://github.com/sponsors/williamboman)
 
