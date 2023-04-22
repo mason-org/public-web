@@ -1,84 +1,95 @@
-import AdmZip from "adm-zip";
-import Head from "next/head";
-import type { GetStaticProps } from "next";
-import { List, ListItem } from "../../components/List";
+import AdmZip from "adm-zip"
+import Head from "next/head"
+import type { GetStaticProps } from "next"
+import { List, ListItem } from "../../components/List"
 
-import styles from "./list.module.css";
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import styles from "./list.module.css"
+import { RefObject, useEffect, useRef, useState } from "react"
+import { EmptySearch, SearchInput, SearchValue, parseSearch } from "@/components/SearchInput"
+import { groupBy } from "@/lib/functional"
 
 type Package = {
-  name: string;
-  description: string;
-  homepage: string;
-  licenses: string[];
-  categories: string[];
-  languages: string[];
-  source: { id: string };
-};
+  name: string
+  description: string
+  homepage: string
+  licenses: string[]
+  categories: string[]
+  languages: string[]
+  source: { id: string }
+}
 
 type Props = {
-  packages: Package[];
-  checksum: string;
-  version: string;
-  timestamp: string;
-};
+  packages: Package[]
+  checksum: string
+  version: string
+  timestamp: string
+}
 
-export default function RegistryList({
-  packages,
-  checksum,
-  timestamp,
-  version,
-}: Props) {
-  const [filteredPackages, setFilteredPackages] = useState(packages);
-  const searchRef = useRef<HTMLInputElement | null>(null);
-  const [search, setSearch] = useState<string>("");
-  const handleSearchChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      setSearch(event.target.value);
-    },
-    []
-  );
-
-  useEffect(() => {
-    const trimmedSearch = search.trim();
-    const containsUpperCase = /[A-Z]/.test(trimmedSearch);
-
-    const normalize = (value: string) =>
-      containsUpperCase ? value : value.toLowerCase();
-
-    if (trimmedSearch === "") {
-      setFilteredPackages(packages);
-    } else {
-      setFilteredPackages(
-        packages.filter((pkg) => {
-          return (
-            normalize(pkg.name).includes(trimmedSearch) ||
-            pkg.languages.some((language) =>
-              normalize(language).includes(trimmedSearch)
-            ) ||
-            pkg.categories.some((category) =>
-              normalize(category).includes(trimmedSearch)
-            )
-          );
-        })
-      );
-    }
-  }, [search, packages]);
-
+const useVimSearchKeybind = (inputRef: RefObject<HTMLInputElement>) => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "/") {
-        if (searchRef.current) {
-          searchRef.current.focus();
+        if (inputRef.current) {
+          inputRef.current.focus()
         }
       }
-    };
-    document.addEventListener("keyup", handleKeyDown);
+    }
+    document.addEventListener("keyup", handleKeyDown)
 
     return () => {
-      document.removeEventListener("keyup", handleKeyDown);
-    };
-  });
+      document.removeEventListener("keyup", handleKeyDown)
+    }
+  })
+}
+
+type SearchKeyword = "language" | "category"
+
+function mapKeyword(keyword: SearchKeyword): keyof Package {
+  switch (keyword) {
+    case "language":
+      return "languages"
+    case "category":
+      return "categories"
+  }
+}
+
+export default function RegistryList({ packages, checksum, timestamp, version }: Props) {
+  const [filteredPackages, setFilteredPackages] = useState(packages)
+  const searchRef = useRef<HTMLInputElement>(null)
+  const [search, setSearch] = useState<SearchValue<SearchKeyword>>(EmptySearch as SearchValue<SearchKeyword>)
+
+  useVimSearchKeybind(searchRef)
+
+  useEffect(() => {
+    if (search === EmptySearch) {
+      setFilteredPackages(packages)
+      return
+    }
+
+    setFilteredPackages(
+      packages.filter(
+        (pkg) =>
+          search.values.every((input) => {
+            return (
+              pkg.name.toLowerCase().includes(input.toLowerCase()) ||
+              pkg.description.toLowerCase().includes(input.toLowerCase())
+            )
+          }) &&
+          groupBy(search.keywords, "keyword").every((group) =>
+            group.every(({ keyword, value }) => {
+              const input = pkg[mapKeyword(keyword)]
+              if (Array.isArray(input)) {
+                return input.some((item) => item.toLowerCase().includes(value.toLowerCase()))
+              } else if (typeof input === "string") {
+                return input.toLowerCase().includes(value.toLowerCase())
+              } else {
+                return false
+              }
+            })
+          )
+      )
+    )
+  }, [search, packages])
 
   return (
     <>
@@ -86,28 +97,28 @@ export default function RegistryList({
         <title>Mason Registry packages | mason-registry.dev</title>
       </Head>
       <main>
-        <h1>Package list</h1>
+        <header>
+          <h1>Package list</h1>
 
-        <input
-          className={styles["input"]}
-          ref={searchRef}
-          id="search"
-          value={search}
-          type="search"
-          placeholder="Search"
-          onChange={handleSearchChange}
-        />
+          <SearchInput placeholder="Search" className={styles.input} value={search} onChange={setSearch} />
+          <p>
+            <small>
+              Examples: <code>language:&quot;standard ml&quot; category:lsp</code> |{" "}
+              <code>language:json category:lsp openapi</code>
+            </small>
+          </p>
+        </header>
 
         <List as="ol">
           {filteredPackages.map((pkg) => {
-            const id = encodeURIComponent(pkg.name);
+            const id = encodeURIComponent(pkg.name)
             return (
               <ListItem key={pkg.name}>
                 <h2 id={id}>
                   <a href={`#${id}`}>#</a> {pkg.name}
                 </h2>
                 <p>{pkg.description}</p>
-                <table className={styles["table"]}>
+                <table className={styles.table}>
                   <tbody>
                     <tr>
                       <td title="Package URL">purl</td>
@@ -132,7 +143,7 @@ export default function RegistryList({
                           <a
                             key={category}
                             href="#search"
-                            onClick={() => setSearch(category)}
+                            onClick={() => setSearch(parseSearch(`category:${category}`) as SearchValue<SearchKeyword>)}
                           >
                             <code>{category}</code>
                           </a>
@@ -147,7 +158,7 @@ export default function RegistryList({
                           <a
                             key={language}
                             href="#search"
-                            onClick={() => setSearch(language)}
+                            onClick={() => setSearch(parseSearch(`language:${language}`) as SearchValue<SearchKeyword>)}
                           >
                             <code>{language}</code>
                           </a>
@@ -165,14 +176,14 @@ export default function RegistryList({
                     </tr>
                   </tbody>
                 </table>
-                <pre className={styles["pre"]}>:MasonInstall {pkg.name}</pre>
+                <pre className={styles.pre}>:MasonInstall {pkg.name}</pre>
               </ListItem>
-            );
+            )
           })}
         </List>
       </main>
       <footer>
-        <table className={styles["table"]}>
+        <table className={styles.table}>
           <tbody>
             <tr>
               <td>Last updated</td>
@@ -194,38 +205,34 @@ export default function RegistryList({
         </table>
       </footer>
     </>
-  );
+  )
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const timestamp = new Date().toISOString();
+  const timestamp = new Date().toISOString()
   const latestRelease = await (
-    await fetch(
-      "https://api.github.com/repos/mason-org/mason-registry/releases/latest"
-    )
-  ).json();
-  const version = latestRelease.tag_name;
+    await fetch("https://api.github.com/repos/mason-org/mason-registry/releases/latest")
+  ).json()
+  const version = latestRelease.tag_name
 
   const registryZip = await fetch(
     `https://github.com/mason-org/mason-registry/releases/download/${version}/registry.json.zip`
-  );
+  )
 
-  const zip = new AdmZip(Buffer.from(await registryZip.arrayBuffer()));
-  const packages: Package[] = JSON.parse(zip.readAsText("registry.json"));
+  const zip = new AdmZip(Buffer.from(await registryZip.arrayBuffer()))
+  const packages: Package[] = JSON.parse(zip.readAsText("registry.json"))
 
-  packages.sort((a, b) => a.name.localeCompare(b.name));
+  packages.sort((a, b) => a.name.localeCompare(b.name))
   const checksums = await (
-    await fetch(
-      `https://github.com/mason-org/mason-registry/releases/download/${version}/checksums.txt`
-    )
-  ).text();
+    await fetch(`https://github.com/mason-org/mason-registry/releases/download/${version}/checksums.txt`)
+  ).text()
 
   const checksum = checksums
     .split("\n")
     .filter((line) => line !== "")
     .map((line) => line.split("  "))
     .map(([checksum, file]) => ({ checksum, file }))
-    .find((entry) => entry.file == "registry.json")?.checksum;
+    .find((entry) => entry.file === "registry.json")?.checksum
 
   return {
     props: {
@@ -235,5 +242,5 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       timestamp,
     },
     revalidate: 1800,
-  };
-};
+  }
+}

@@ -1,4 +1,5 @@
-.table {}
+.table {
+}
 
 .table > tbody > tr > td {
   padding-bottom: var(--spacing-tiny);

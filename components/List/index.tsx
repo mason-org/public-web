@@ -1,19 +1,23 @@
-import { HTMLAttributes, ReactNode } from "react";
-import styles from "./index.module.css";
+import { HTMLAttributes, ReactNode } from "react"
+import styles from "./index.module.css"
 
-type ListProps = {
-  as: "ol" | "ul";
-  children: ReactNode;
-} & HTMLAttributes<HTMLOListElement | HTMLUListElement>;
+type ListProps = HTMLAttributes<HTMLOListElement | HTMLUListElement> & {
+  as: "ol" | "ul"
+  children: ReactNode
+}
 
-export const List = ({ children, as: As, ...rest }: ListProps) => (
-  <As className={styles["container"]} {...rest}>
-    {children}
-  </As>
-);
+export function List({ children, as: As, ...rest }: ListProps) {
+  return (
+    <As className={styles.container} {...rest}>
+      {children}
+    </As>
+  )
+}
 
 type ListItemProps = {
-  children: ReactNode;
-};
+  children: ReactNode
+}
 
-export const ListItem = ({ children }: ListItemProps) => <li>{children}</li>;
+export function ListItem({ children }: ListItemProps) {
+  return <li>{children}</li>
+}
