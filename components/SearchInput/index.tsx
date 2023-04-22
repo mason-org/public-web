@@ -1,4 +1,4 @@
-import { ChangeEvent, HTMLAttributes, useCallback } from "react"
+import { ForwardedRef, RefAttributes, ChangeEvent, HTMLAttributes, forwardRef, useCallback } from "react"
 
 export type SearchValue<Keyword> = {
   values: string[]
@@ -40,7 +40,10 @@ export const EmptySearch: Readonly<SearchValue<unknown>> = {
   keywords: [],
 }
 
-export function SearchInput<Keyword>({ value, onChange, ...rest }: Props<Keyword>) {
+function SearchInputComponent<Keyword>(
+  { value, onChange, ...rest }: Props<Keyword> & RefAttributes<HTMLInputElement>,
+  ref: ForwardedRef<HTMLInputElement>
+) {
   const handleChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       if (event.target.value === "") {
@@ -52,5 +55,7 @@ export function SearchInput<Keyword>({ value, onChange, ...rest }: Props<Keyword
     [onChange]
   )
 
-  return <input {...rest} type="search" value={value.raw} onChange={handleChange} />
+  return <input {...rest} ref={ref} type="search" value={value.raw} onChange={handleChange} />
 }
+
+export const SearchInput = forwardRef(SearchInputComponent)

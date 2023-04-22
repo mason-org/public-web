@@ -1,12 +1,13 @@
 import AdmZip from "adm-zip"
 import type { GetStaticProps } from "next"
-import { List, ListItem } from "../../components/List"
+import { RefObject, useEffect, useRef, useState } from "react"
+
+import { EmptySearch, SearchInput, SearchValue, parseSearch } from "@/components/SearchInput"
+import { Title } from "@/components/Title"
+import { groupBy } from "@/lib/functional"
 
 import styles from "./list.module.css"
-import { RefObject, useEffect, useRef, useState } from "react"
-import { EmptySearch, SearchInput, SearchValue, parseSearch } from "@/components/SearchInput"
-import { groupBy } from "@/lib/functional"
-import { Title } from "@/components/Title"
+import { List, ListItem } from "../../components/List"
 
 type Package = {
   name: string
@@ -98,7 +99,14 @@ export default function RegistryList({ packages, checksum, timestamp, version }:
         <header>
           <h1>Package list</h1>
 
-          <SearchInput placeholder="Search" className={styles.input} value={search} onChange={setSearch} />
+          <SearchInput
+            id="search"
+            ref={searchRef}
+            placeholder="Search"
+            className={styles.input}
+            value={search}
+            onChange={setSearch}
+          />
           <p>
             <small>
               Examples: <code>language:&quot;standard ml&quot; category:lsp</code> |{" "}
