@@ -1,5 +1,4 @@
 import AdmZip from "adm-zip"
-import Head from "next/head"
 import type { GetStaticProps } from "next"
 import { List, ListItem } from "../../components/List"
 
@@ -7,6 +6,7 @@ import styles from "./list.module.css"
 import { RefObject, useEffect, useRef, useState } from "react"
 import { EmptySearch, SearchInput, SearchValue, parseSearch } from "@/components/SearchInput"
 import { groupBy } from "@/lib/functional"
+import { Title } from "@/components/Title"
 
 type Package = {
   name: string
@@ -93,9 +93,7 @@ export default function RegistryList({ packages, checksum, timestamp, version }:
 
   return (
     <>
-      <Head>
-        <title>Mason Registry packages | mason-registry.dev</title>
-      </Head>
+      <Title title="Package list" />
       <main>
         <header>
           <h1>Package list</h1>
