@@ -1,11 +1,14 @@
-import "@/styles/globals.css";
-import { AppProps } from "next/app";
-import Head from "next/head";
-import Link from "next/link";
+import "@/styles/globals.css"
+import { AppProps } from "next/app"
+import Head from "next/head"
+import Link from "next/link"
+
+import { Title } from "@/components/Title"
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
+      <Title />
       <Head>
         <meta content="width=device-width, initial-scale=1" name="viewport" />
       </Head>
@@ -34,5 +37,5 @@ export default function App({ Component, pageProps }: AppProps) {
       </header>
       <Component {...pageProps} />
     </>
-  );
+  )
 }
