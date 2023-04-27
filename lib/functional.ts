@@ -1,5 +1,5 @@
-export function groupBy<T>(objects: T[], field: keyof T): T[][] {
-  const groups: { [key in keyof T]?: T[] } = {}
+export function groupBy<T, K extends keyof T>(objects: T[], field: K): Record<K, T[]> {
+  const groups: Record<string | number | symbol, T[]> = {}
   for (const item of objects) {
     const key = item[field] as keyof T
     const group = groups[key]
@@ -9,5 +9,5 @@ export function groupBy<T>(objects: T[], field: keyof T): T[][] {
       groups[key] = [item]
     }
   }
-  return Object.values(groups)
+  return groups
 }
