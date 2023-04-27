@@ -1,7 +1,7 @@
 import { groupBy } from "./functional"
 
 describe("functional :: groupBy", () => {
-  it("should group by field", () => {
+  it("should groupBy field", () => {
     expect(
       groupBy(
         [
@@ -11,12 +11,12 @@ describe("functional :: groupBy", () => {
         ],
         "color"
       )
-    ).toEqual([
-      [
+    ).toEqual({
+      red: [
         { color: "red", item: "apple" },
         { color: "red", item: "tomato" },
       ],
-      [{ color: "yellow", item: "banana" }],
-    ])
+      yellow: [{ color: "yellow", item: "banana" }],
+    })
   })
 })
