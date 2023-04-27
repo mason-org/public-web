@@ -4,6 +4,7 @@ import { RefObject, useEffect, useRef, useState } from "react"
 
 import { EmptySearch, SearchInput, SearchValue, parseSearch } from "@/components/SearchInput"
 import { Title } from "@/components/Title"
+import { requiredEnv } from "@/lib/env"
 import { groupBy } from "@/lib/functional"
 
 import styles from "./list.module.css"
@@ -217,7 +218,11 @@ export default function RegistryList({ packages, checksum, timestamp, version }:
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const timestamp = new Date().toISOString()
   const latestRelease = await (
-    await fetch("https://api.github.com/repos/mason-org/mason-registry/releases/latest")
+    await fetch("https://api.github.com/repos/mason-org/mason-registry/releases/latest", {
+      headers: {
+        "Authorization": `Bearer ${requiredEnv("GITHUB_TOKEN")}`
+      }
+    })
   ).json()
   const version = latestRelease.tag_name
 
