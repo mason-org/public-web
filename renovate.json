@@ -2,6 +2,9 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "automerge": true,
   "platformAutomerge": true,
+  "schedule": [
+    "on monday"
+  ],
   "extends": [
     "config:base"
   ]
