@@ -18,6 +18,7 @@ type Package = {
   categories: string[]
   languages: string[]
   source: { id: string }
+  bin?: { [name: string]: string }
 }
 
 type Props = {
@@ -72,18 +73,21 @@ export default function RegistryList({ packages, checksum, timestamp, version }:
       packages.filter(
         (pkg) =>
           search.values.every((input) => {
+            const lcInput = input.toLowerCase()
             return (
-              pkg.name.toLowerCase().includes(input.toLowerCase()) ||
-              pkg.description.toLowerCase().includes(input.toLowerCase())
+              pkg.name.toLowerCase().includes(lcInput) ||
+              pkg.description.toLowerCase().includes(lcInput) ||
+              (pkg.bin && Object.keys(pkg.bin).some((name) => name.toLowerCase().includes(lcInput)))
             )
           }) &&
           Object.values(groupBy(search.keywords, "keyword")).every((group) =>
-            group.some(({ keyword, value }) => {
-              const input = pkg[mapKeyword(keyword)]
-              if (Array.isArray(input)) {
-                return input.some((item) => item.toLowerCase().includes(value.toLowerCase()))
-              } else if (typeof input === "string") {
-                return input.toLowerCase().includes(value.toLowerCase())
+            group.some(({ keyword, value: input }) => {
+              const value = pkg[mapKeyword(keyword)]
+              const lcInput = input.toLowerCase()
+              if (Array.isArray(value)) {
+                return value.some((item) => item.toLowerCase().includes(lcInput))
+              } else if (typeof value === "string") {
+                return value.toLowerCase().includes(lcInput)
               } else {
                 return false
               }
@@ -181,6 +185,16 @@ export default function RegistryList({ packages, checksum, timestamp, version }:
                         ))}
                       </td>
                     </tr>
+
+                    {pkg.bin &&
+                      Object.keys(pkg.bin).map((executable_name, idx) => (
+                        <tr key={executable_name}>
+                          <td>{idx === 0 && "Executables"}</td>
+                          <td>
+                            <code>{executable_name}</code>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
                 <pre className={styles.pre}>:MasonInstall {pkg.name}</pre>
@@ -220,8 +234,8 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   const latestRelease = await (
     await fetch("https://api.github.com/repos/mason-org/mason-registry/releases/latest", {
       headers: {
-        "Authorization": `Bearer ${requiredEnv("GITHUB_TOKEN")}`
-      }
+        Authorization: `Bearer ${requiredEnv("GITHUB_TOKEN")}`,
+      },
     })
   ).json()
   const version = latestRelease.tag_name
