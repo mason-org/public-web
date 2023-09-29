@@ -91,9 +91,9 @@ export default function RegistryList({ packages, checksum, timestamp, version }:
               } else {
                 return false
               }
-            })
-          )
-      )
+            }),
+          ),
+      ),
     )
   }, [search, packages])
 
@@ -126,7 +126,16 @@ export default function RegistryList({ packages, checksum, timestamp, version }:
             return (
               <ListItem key={pkg.name}>
                 <h2 id={id}>
-                  <a href={`#${id}`}>#</a> {pkg.name}
+                  <a href={`#${id}`} aria-label="Anchor link to package">
+                    #
+                  </a>
+                  <span>&nbsp;</span>
+                  <a
+                    href={`https://github.com/mason-org/mason-registry/blob/${version}/packages/${pkg.name}/package.yaml`}
+                    aria-label="External link to package definition"
+                  >
+                    {pkg.name}
+                  </a>
                 </h2>
                 <p>{pkg.description}</p>
                 <table className={styles.table}>
@@ -141,9 +150,7 @@ export default function RegistryList({ packages, checksum, timestamp, version }:
                     <tr>
                       <td>Homepage</td>
                       <td>
-                        <a href={pkg.homepage} target="_blank">
-                          {pkg.homepage}
-                        </a>
+                        <a href={pkg.homepage}>{pkg.homepage}</a>
                       </td>
                     </tr>
 
@@ -241,7 +248,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   const version = latestRelease.tag_name
 
   const registryZip = await fetch(
-    `https://github.com/mason-org/mason-registry/releases/download/${version}/registry.json.zip`
+    `https://github.com/mason-org/mason-registry/releases/download/${version}/registry.json.zip`,
   )
 
   const zip = new AdmZip(Buffer.from(await registryZip.arrayBuffer()))

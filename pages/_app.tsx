@@ -22,14 +22,10 @@ export default function App({ Component, pageProps }: AppProps) {
               <Link href="/registry/list">Package list</Link>
             </li>
             <li>
-              <a target="_blank" href="https://github.com/williamboman/mason.nvim">
-                mason.nvim
-              </a>
+              <a href="https://github.com/williamboman/mason.nvim">mason.nvim</a>
             </li>
             <li>
-              <a target="_blank" href="https://github.com/mason-org/mason-registry">
-                mason-registry
-              </a>
+              <a href="https://github.com/mason-org/mason-registry">mason-registry</a>
             </li>
           </ul>
         </nav>
