@@ -1,6 +1,8 @@
 import AdmZip from "adm-zip"
 import type { GetStaticProps } from "next"
-import { RefObject, useEffect, useRef, useState } from "react"
+import { usePathname, useSearchParams } from "next/navigation"
+import { useRouter } from "next/router"
+import { RefObject, useCallback, useEffect, useRef, useState } from "react"
 
 import { EmptySearch, SearchInput, SearchValue, parseSearch } from "@/components/SearchInput"
 import { Title } from "@/components/Title"
@@ -61,6 +63,37 @@ export default function RegistryList({ packages, checksum, timestamp, version }:
   const searchRef = useRef<HTMLInputElement>(null)
   const [search, setSearch] = useState<SearchValue<SearchKeyword>>(EmptySearch as SearchValue<SearchKeyword>)
 
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const searchParamValue = searchParams.get("search")
+
+  useEffect(() => {
+    if (searchParamValue != null && searchParamValue !== "") {
+      setSearch(parseSearch(searchParamValue) as SearchValue<SearchKeyword>)
+    } else {
+      setSearch(EmptySearch as SearchValue<SearchKeyword>)
+    }
+  }, [searchParamValue])
+
+  const handleSearchBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      const newSearchParams = new URLSearchParams(searchParams)
+      newSearchParams.set("search", e.target.value)
+      router.push(
+        {
+          pathname,
+          search: newSearchParams.toString(),
+        },
+        undefined,
+        {
+          scroll: false,
+        },
+      )
+    },
+    [router],
+  )
+
   useVimSearchKeybind(searchRef)
 
   useEffect(() => {
@@ -111,6 +144,7 @@ export default function RegistryList({ packages, checksum, timestamp, version }:
             className={styles.input}
             value={search}
             onChange={setSearch}
+            onBlur={handleSearchBlur}
           />
           <p>
             <small>
