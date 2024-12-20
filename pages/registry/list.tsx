@@ -91,7 +91,7 @@ export default function RegistryList({ packages, checksum, timestamp, version }:
         },
       )
     },
-    [router],
+    [router, pathname, searchParams],
   )
 
   useVimSearchKeybind(searchRef)
