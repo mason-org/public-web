@@ -30,7 +30,7 @@ type Props = {
   timestamp: string
 }
 
-const useVimSearchKeybind = (inputRef: RefObject<HTMLInputElement>) => {
+const useVimSearchKeybind = (inputRef: RefObject<HTMLInputElement | null>) => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "/") {
